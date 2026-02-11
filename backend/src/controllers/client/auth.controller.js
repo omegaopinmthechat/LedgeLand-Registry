@@ -2,6 +2,7 @@ import authService from "../../services/client/auth.service.js";
 import HTTP_STATUS from "../../../utils/http.js";
 import { ApiError } from "../../../utils/ApiError.js";
 import { ApiResponse } from "../../../utils/ApiResponse.js";
+import passwordRegex from "../../../utils/passwordRegex.js";
 
 const login = async (req, res) => {
   try {
@@ -35,7 +36,6 @@ const login = async (req, res) => {
   }
 };
 
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const register = async (req, res) => {
   try {

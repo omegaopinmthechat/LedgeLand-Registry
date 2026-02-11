@@ -1,13 +1,15 @@
 import express from 'express';
 import './config/env.js'
 import authRoutes from './routes/client/auth.routes.js';
+import registrarAuthRoutes from './routes/registrar/registrar.auth.routes.js';
 
 const app = express()
-const auth = "/api/v1/auth"
+const baseUrl = "/api/v1";
 
 app.use(express.json())
 
-app.use(`${auth}`, authRoutes);
+app.use(`${baseUrl}/auth`, authRoutes);
+app.use(`${baseUrl}/registrar`, registrarAuthRoutes);
 
 app.get('/', (req,res)=>{
     return res.send("PROJECT_9")
