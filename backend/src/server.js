@@ -1,5 +1,6 @@
 import express from 'express';
-import './config/env.js'
+import './config/env.js';
+import cors from "cors";
 import authRoutes from './routes/client/auth.routes.js';
 import registrarAuthRoutes from './routes/registrar/registrar.auth.routes.js';
 
@@ -7,6 +8,12 @@ const app = express()
 const baseUrl = "/api/v1";
 
 app.use(express.json())
+
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 
 app.use(`${baseUrl}/auth`, authRoutes);
 app.use(`${baseUrl}/registrar`, registrarAuthRoutes);

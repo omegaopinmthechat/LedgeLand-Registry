@@ -25,6 +25,7 @@ const login = async (req, res) => {
       .status(HTTP_STATUS.OK)
       .json(new ApiResponse(HTTP_STATUS.OK, data, "Login successful"));
   } catch (error) {
+    console.error("Login error:", error.message, error);
     return res
       .status(HTTP_STATUS.UNAUTHORIZED)
       .json(
@@ -81,6 +82,7 @@ const register = async (req, res) => {
         ),
       );
   } catch (error) {
+    console.error("Registration error:", error.message, error);
     return res
       .status(HTTP_STATUS.BAD_REQUEST)
       .json(
