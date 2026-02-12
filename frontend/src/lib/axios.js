@@ -35,10 +35,19 @@ api.interceptors.response.use(
       message: error.message,
     });
 
-    if (error.response?.status === 401) {
+    // Only redirect to login if user is authenticated but token is invalid/expired
+    // Don't redirect on login/register attempts
+    const isAuthEndpoint = error.config?.url?.includes("/auth/login") || 
+                           error.config?.url?.includes("/auth/register");
+    
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+      
+      // Only redirect if not already on login page
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

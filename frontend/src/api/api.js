@@ -22,3 +22,9 @@ export const logoutUser = async () => {
   const response = await api.post("/api/v1/auth/logout");
   return response.data;
 };
+
+// Handles registrar login with username and password
+export const loginRegistrar = async (username, password) => {
+  const response = await api.post("/api/v1/registrar/login", { username, password });
+  return response.data;
+};

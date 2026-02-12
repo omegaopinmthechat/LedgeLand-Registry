@@ -4,20 +4,22 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-// Dashboard page accessible only to authenticated users
+// Dashboard page accessible only to authenticated client users
 export default function DashboardPage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isRegistrar, logout } = useAuth();
   const router = useRouter();
 
-  // Redirects to login page if user is not authenticated
+  // Redirects to login page if user is not authenticated or is a registrar
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login");
+    } else if (isRegistrar) {
+      router.push("/registrar/dashboard");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isRegistrar, router]);
 
-  // Shows dashboard content only if user is authenticated
-  if (!isAuthenticated) {
+  // Shows dashboard content only if user is authenticated and not a registrar
+  if (!isAuthenticated || isRegistrar) {
     return null;
   }
 

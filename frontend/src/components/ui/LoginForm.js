@@ -13,7 +13,7 @@ const LoginForm = () => {
   const searchParams = useSearchParams();
   const isRegistered = searchParams.get("registered") === "true";
   const [successMessage, setSuccessMessage] = useState(
-    isRegistered ? "Registration successful! Please log in with your credentials." : ""
+    isRegistered ? "Registration successful! Please verify from your email and login." : ""
   );
   const { handleLogin, loading, error, setError } = useLogin();
 

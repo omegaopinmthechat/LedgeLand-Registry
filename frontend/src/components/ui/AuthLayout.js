@@ -6,9 +6,8 @@ import Image from "next/image";
 const AuthLayout = ({ children, imageSrc = "/auth-image.jpg", imageAlt = "Authentication" }) => {
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-600 to-purple-700">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      {/* Left side - Solid Color */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-blue-600">
         <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
           <h2 className="text-4xl font-bold mb-4">Welcome to Our Platform</h2>
           <p className="text-xl text-center max-w-md">
