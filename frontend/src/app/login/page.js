@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import AuthLayout from "@/components/ui/AuthLayout";
 import LoginForm from "@/components/ui/LoginForm";
 
@@ -5,7 +6,9 @@ import LoginForm from "@/components/ui/LoginForm";
 export default function LoginPage() {
   return (
     <AuthLayout>
-      <LoginForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginForm />
+      </Suspense>
     </AuthLayout>
   );
 }
