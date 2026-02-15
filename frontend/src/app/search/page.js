@@ -1,19 +1,36 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import { useWeb3 } from "@/context/Web3Context";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getOwnershipHistory, getLandDetails, formatNationalId } from "@/services/blockchain";
 
-// Public search page for viewing land ownership history
+// Authenticated search page for viewing land ownership history
 export default function SearchPage() {
+  const { isAuthenticated, isRegistrar } = useAuth();
   const { getReadOnlyContract, networkConfig } = useWeb3();
+  const router = useRouter();
 
   const [plotId, setPlotId] = useState("");
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState(null);
   const [landDetails, setLandDetails] = useState(null);
   const [ownershipHistory, setOwnershipHistory] = useState([]);
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Redirect unauthenticated users to login
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [mounted, isAuthenticated, router]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -55,6 +72,30 @@ export default function SearchPage() {
     setOwnershipHistory([]);
   };
 
+  // Show loading state during mount to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -62,13 +103,13 @@ export default function SearchPage() {
           <div className="flex justify-between h-16 items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Land Registry Search</h1>
-              <p className="text-xs text-gray-500">Public Blockchain Records</p>
+              <p className="text-xs text-gray-500">Blockchain Verified Records</p>
             </div>
             <Link
-              href="/"
+              href={isRegistrar ? "/registrar/dashboard" : "/dashboard"}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
             >
-              Home
+              {isRegistrar ? "Dashboard" : "Dashboard"}
             </Link>
           </div>
         </div>
@@ -148,24 +189,50 @@ export default function SearchPage() {
 
         {/* Land Details */}
         {landDetails && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Land Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Plot ID</p>
-                <p className="text-base font-medium text-gray-900">{landDetails.plotId}</p>
+          <div className="bg-white rounded-lg shadow mb-6">
+            {/* Verification Banner */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-t-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                  />
+                </svg>
+                <span className="font-semibold">Blockchain Verified Land Record</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Location</p>
-                <p className="text-base font-medium text-gray-900">{landDetails.location}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Current Owner Name</p>
-                <p className="text-base font-medium text-gray-900">{landDetails.currentOwnerName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Current Owner National ID</p>
-                <p className="text-base font-medium text-gray-900 font-mono">{landDetails.currentOwnerNationalId}</p>
+              <span className="text-xs bg-white bg-opacity-25 px-3 py-1 rounded-full">
+                Sepolia Network
+              </span>
+            </div>
+            
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Land Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Plot ID</p>
+                  <p className="text-base font-medium text-gray-900">{landDetails.plotId}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="text-base font-medium text-gray-900">{landDetails.location}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Current Owner Name</p>
+                  <p className="text-base font-medium text-gray-900">{landDetails.currentOwnerName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Current Owner National ID</p>
+                  <p className="text-base font-medium text-gray-900 font-mono">{landDetails.currentOwnerNationalId}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -207,11 +274,32 @@ export default function SearchPage() {
                         <p className="text-xs text-gray-500">{record.date}</p>
                       </div>
                     </div>
-                    {index === ownershipHistory.length - 1 && (
-                      <span className="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-full">
-                        Current Owner
-                      </span>
-                    )}
+                    <div className="flex gap-2">
+                      {record.verified && (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-3 h-3"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
+                            />
+                          </svg>
+                          Verified
+                        </span>
+                      )}
+                      {index === ownershipHistory.length - 1 && (
+                        <span className="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-full">
+                          Current Owner
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -238,6 +326,82 @@ export default function SearchPage() {
                         </a>
                       </div>
                     </div>
+
+                    {/* Blockchain Verification Section */}
+                    {record.verified && (
+                      <div className="mt-3 pt-3 border-t border-gray-300">
+                        <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-4 h-4"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                            />
+                          </svg>
+                          Blockchain Verification
+                        </p>
+                        <div className="space-y-2">
+                          {record.transactionHash && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Transaction Hash</p>
+                              <div className="flex items-center gap-2">
+                                <code className="text-xs font-mono text-gray-700 break-all flex-1">
+                                  {record.transactionHash}
+                                </code>
+                                <a
+                                  href={record.explorerUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition shrink-0"
+                                  title="View on Etherscan"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                    stroke="currentColor"
+                                    className="w-4 h-4"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                                    />
+                                  </svg>
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                          {record.blockNumber && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Block Number</p>
+                              <div className="flex items-center gap-2">
+                                <code className="text-xs font-mono text-gray-700">
+                                  {record.blockNumber}
+                                </code>
+                                <a
+                                  href={record.blockExplorerUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition"
+                                  title="View block on Etherscan"
+                                >
+                                  View Block
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -247,7 +411,7 @@ export default function SearchPage() {
 
         {/* Info Section */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">About Blockchain Records</h3>
+          <h3 className="text-sm font-semibold text-blue-900 mb-3">About Blockchain Verification</h3>
           <ul className="space-y-2 text-sm text-blue-800">
             <li className="flex items-start gap-2">
               <svg
@@ -264,7 +428,24 @@ export default function SearchPage() {
                   d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>All ownership records are stored immutably on the Ethereum blockchain</span>
+              <span>All ownership records are immutably stored on Ethereum Sepolia blockchain</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5 shrink-0 mt-0.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Each record includes transaction hash and block number for independent verification</span>
             </li>
             <li className="flex items-start gap-2">
               <svg
@@ -282,6 +463,23 @@ export default function SearchPage() {
                 />
               </svg>
               <span>Deed documents are stored on IPFS with permanent, tamper-proof access</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5 shrink-0 mt-0.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Click transaction hashes to verify records directly on Etherscan</span>
             </li>
             <li className="flex items-start gap-2">
               <svg

@@ -179,10 +179,10 @@ export const registerLand = async (
 };
 
 /**
- * Get ownership history for a plot (gas-free view function)
+ * Get ownership history for a plot with blockchain verification details
  * @param {Object} contract - Ethers contract instance (read-only OK)
  * @param {number} plotId - Plot ID
- * @returns {Promise<Array>} Ownership history
+ * @returns {Promise<Array>} Ownership history with verification data
  */
 export const getOwnershipHistory = async (contract, plotId) => {
   if (!contract) {
@@ -194,17 +194,45 @@ export const getOwnershipHistory = async (contract, plotId) => {
   }
 
   try {
+    // Get ownership history from contract
     const history = await contract.getOwnershipHistory(plotId);
 
-    // Format the history data
-    return history.map((record) => ({
-      ownerName: record.ownerName,
-      nationalId: record.nationalId,
-      deedCID: record.deedCID,
-      timestamp: Number(record.timestamp),
-      date: new Date(Number(record.timestamp) * 1000).toLocaleString(),
-      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${record.deedCID}`,
-    }));
+    // Get blockchain events for verification
+    const registeredFilter = contract.filters.LandRegistered(plotId);
+    const transferredFilter = contract.filters.OwnershipTransferred(plotId);
+
+    const [registeredEvents, transferredEvents] = await Promise.all([
+      contract.queryFilter(registeredFilter),
+      contract.queryFilter(transferredFilter),
+    ]);
+
+    // Combine all events and sort by block number
+    const allEvents = [...registeredEvents, ...transferredEvents].sort(
+      (a, b) => a.blockNumber - b.blockNumber
+    );
+
+    // Format the history data with blockchain verification
+    return history.map((record, index) => {
+      const event = allEvents[index];
+      return {
+        ownerName: record.ownerName,
+        nationalId: record.nationalId,
+        deedCID: record.deedCID,
+        timestamp: Number(record.timestamp),
+        date: new Date(Number(record.timestamp) * 1000).toLocaleString(),
+        ipfsUrl: `https://gateway.pinata.cloud/ipfs/${record.deedCID}`,
+        // Blockchain verification data
+        transactionHash: event?.transactionHash || null,
+        blockNumber: event?.blockNumber || null,
+        explorerUrl: event?.transactionHash 
+          ? `https://sepolia.etherscan.io/tx/${event.transactionHash}`
+          : null,
+        blockExplorerUrl: event?.blockNumber
+          ? `https://sepolia.etherscan.io/block/${event.blockNumber}`
+          : null,
+        verified: !!event?.transactionHash,
+      };
+    });
   } catch (error) {
     console.error("Get ownership history error:", error);
     

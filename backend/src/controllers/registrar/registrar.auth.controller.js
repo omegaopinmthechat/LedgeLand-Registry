@@ -48,10 +48,10 @@ const login = async (req, res) => {
 const create = async (req, res) => {
   try {
     console.log("[Registrar Create] Received request body:", req.body);
-    const { password, confirm_password, full_name } = req.body;
+    const { password, confirm_password, full_name, date_of_birth } = req.body;
 
     console.log("[Registrar Create] Step 1: Checking required fields");
-    if (!password || !confirm_password || !full_name) {
+    if (!password || !confirm_password || !full_name || !date_of_birth) {
       console.log("[Registrar Create] Missing required fields");
       return res
         .status(HTTP_STATUS.BAD_REQUEST)
@@ -88,7 +88,7 @@ const create = async (req, res) => {
     }
 
     console.log("[Registrar Create] Step 4: Calling service");
-    const data = await registrarAuthService.create(password, full_name);
+    const data = await registrarAuthService.create(password, full_name, date_of_birth);
 
     console.log("[Registrar Create] Registrar created successfully:", data.user.username);
     return res

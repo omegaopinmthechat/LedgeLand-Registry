@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-  timeout: 10000,
+  timeout: 120000, // 2 minutes for blockchain transactions
   headers: {
     "Content-Type": "application/json",
   },

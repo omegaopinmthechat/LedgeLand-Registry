@@ -94,36 +94,6 @@ export default function RegistrarDashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <button
-            onClick={() => router.push("/registrar/upload")}
-            className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500 hover:shadow-lg transition text-left"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Upload Documents
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Upload land registry files to IPFS
-                </p>
-              </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-8 h-8 text-orange-500"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                />
-              </svg>
-            </div>
-          </button>
-
-          <button
             onClick={() => router.push("/registrar/register")}
             className="bg-white rounded-lg shadow p-6 border-l-4 border-green-600 hover:shadow-lg transition text-left"
           >
@@ -212,24 +182,6 @@ export default function RegistrarDashboardPage() {
               </svg>
             </div>
           </button>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-gray-300">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Manage Users
-            </h3>
-            <p className="text-gray-600 text-sm">
-              View and manage client accounts
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-gray-300">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Reports
-            </h3>
-            <p className="text-gray-600 text-sm">
-              View system reports and analytics
-            </p>
-          </div>
         </div>
       </main>
     </div>

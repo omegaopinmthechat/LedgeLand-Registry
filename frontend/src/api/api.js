@@ -47,3 +47,33 @@ export const uploadJSONToIPFS = async (metadata) => {
   const response = await api.post("/api/v1/registrar/pinata/json", metadata);
   return response.data;
 };
+
+// Register land on blockchain (Registrar only)
+export const registerLandOnBlockchain = async (landData) => {
+  const response = await api.post("/api/v1/registrar/blockchain/register", landData);
+  return response.data;
+};
+
+// Transfer land ownership on blockchain (Registrar only)
+export const transferLandOnBlockchain = async (transferData) => {
+  const response = await api.post("/api/v1/registrar/blockchain/transfer", transferData);
+  return response.data;
+};
+
+// Get ownership history from blockchain
+export const getOwnershipHistory = async (plotId) => {
+  const response = await api.get(`/api/v1/registrar/blockchain/history/${plotId}`);
+  return response.data;
+};
+
+// Get current owner from blockchain
+export const getCurrentOwner = async (plotId) => {
+  const response = await api.get(`/api/v1/registrar/blockchain/owner/${plotId}`);
+  return response.data;
+};
+
+// Get land details from blockchain
+export const getLandDetails = async (plotId) => {
+  const response = await api.get(`/api/v1/registrar/blockchain/land/${plotId}`);
+  return response.data;
+};

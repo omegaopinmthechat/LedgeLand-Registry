@@ -18,38 +18,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-12">
-          <Link
-            href="/search"
-            className="bg-white rounded-lg shadow-lg p-8 border-t-4 border-blue-600 hover:shadow-xl transition text-center"
-          >
-            <div className="flex flex-col items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-12 h-12 text-blue-600 mb-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Search Land Records
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Look up ownership history and documents for any plot
-              </p>
-              <span className="text-blue-600 font-medium">
-                Browse Records →
-              </span>
-            </div>
-          </Link>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mb-12">
           <Link
             href="/login"
             className="bg-white rounded-lg shadow-lg p-8 border-t-4 border-orange-500 hover:shadow-xl transition text-center"
@@ -143,10 +112,10 @@ export default function Home() {
                 <span className="text-purple-600 font-bold text-lg">3</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">
-                Transparent Verification
+                Secure Verification
               </h3>
               <p className="text-sm text-gray-600">
-                Anyone can verify ownership and full transaction history
+                Authenticated users can verify ownership and full transaction history
               </p>
             </div>
           </div>

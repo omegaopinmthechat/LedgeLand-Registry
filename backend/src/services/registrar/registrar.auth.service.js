@@ -53,17 +53,27 @@ const login = async (username, password) => {
   };
 };
 
-const create = async (password, fullName) => {
-  console.log("[Service] Create called with fullName:", fullName);
-  if (!password || !fullName) {
-    console.log("[Service] Validation failed: missing password or full name");
+const create = async (password, fullName, dateOfBirth) => {
+  console.log("[Service] Create called with fullName:", fullName, "dateOfBirth:", dateOfBirth);
+  if (!password || !fullName || !dateOfBirth) {
+    console.log("[Service] Validation failed: missing required fields");
     throw new ApiError(
       HTTP_STATUS.BAD_REQUEST,
-      "Password and full name are required",
+      "Password, full name, and date of birth are required",
     );
   }
 
-  console.log("[Service] Generating username from full name");
+  // Validate date format DDMMYYYY
+  const dobRegex = /^\d{8}$/;
+  if (!dobRegex.test(dateOfBirth)) {
+    console.log("[Service] Invalid date of birth format");
+    throw new ApiError(
+      HTTP_STATUS.BAD_REQUEST,
+      "Date of birth must be in DDMMYYYY format",
+    );
+  }
+
+  console.log("[Service] Generating username from full name and DOB");
   const firstThreeLetters = fullName
     .trim()
     .substring(0, 3)
@@ -80,8 +90,7 @@ const create = async (password, fullName) => {
     );
   }
 
-  const randomDigits = Math.floor(1000 + Math.random() * 9000);
-  const username = `${firstThreeLetters}${randomDigits}`;
+  const username = `${firstThreeLetters}${dateOfBirth}`;
   const email = `${username}@registrar.com`;
   console.log("[Service] Generated username:", username, "email:", email);
 
@@ -122,6 +131,7 @@ const create = async (password, fullName) => {
         id: data.user.id,
         username: username,
         full_name: fullName,
+        date_of_birth: dateOfBirth,
         created_at: new Date().toISOString(),
       },
     ])

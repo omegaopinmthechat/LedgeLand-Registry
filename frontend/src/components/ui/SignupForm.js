@@ -1,17 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useSignup } from "@/hooks/useAuth";
 
 // Signup form component with email, password, and confirm password inputs
 const SignupForm = () => {
+  const { isAuthenticated, isRegistrar } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { handleSignup, loading, error, setError } = useSignup();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (isRegistrar) {
+        router.push("/registrar/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  }, [isAuthenticated, isRegistrar, router]);
 
   // Toggles password visibility for password field
   const togglePasswordVisibility = () => {

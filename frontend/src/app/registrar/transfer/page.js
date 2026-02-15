@@ -1,16 +1,13 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useWeb3 } from "@/context/Web3Context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { uploadFileToIPFS } from "@/api/api";
-import { transferLandOwnership, formatAddress, formatTxHash } from "@/services/blockchain";
+import { uploadFileToIPFS, transferLandOnBlockchain } from "@/api/api";
 
 // Transfer land ownership page (Registrar only)
 export default function TransferOwnershipPage() {
   const { user, isAuthenticated, isRegistrar, logout } = useAuth();
-  const { account, contract, isConnected, connectWallet, networkConfig } = useWeb3();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -26,6 +23,7 @@ export default function TransferOwnershipPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [txHash, setTxHash] = useState(null);
+  const [explorerUrl, setExplorerUrl] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -80,16 +78,12 @@ export default function TransferOwnershipPage() {
     setError(null);
     setSuccess(null);
     setTxHash(null);
+    setExplorerUrl(null);
 
     try {
       // Validation
       if (!plotId || !newOwnerNationalId || !newOwnerName || !file) {
         setError("All fields are required");
-        return;
-      }
-
-      if (!isConnected) {
-        setError("Please connect your wallet first");
         return;
       }
 
@@ -104,30 +98,45 @@ export default function TransferOwnershipPage() {
       const deedCID = uploadResponse.data.cid;
       setUploading(false);
 
-      // Step 2: Transfer ownership on blockchain
+      // Step 2: Transfer ownership on blockchain via backend
       setTransferring(true);
-      const result = await transferLandOwnership(
-        contract,
-        parseInt(plotId),
+      const result = await transferLandOnBlockchain({
+        plotId: parseInt(plotId),
         newOwnerName,
-        newOwnerNationalId,
-        deedCID
-      );
+        newNationalId: newOwnerNationalId,
+        deedCID,
+      });
 
-      setTxHash(result.transactionHash);
-      setSuccess("Ownership transferred successfully!");
+      if (result.success && result.data) {
+        setTxHash(result.data.transactionHash);
+        setExplorerUrl(result.data.explorerUrl);
+        setSuccess(result.message || "Ownership transferred successfully!");
 
-      // Reset form
-      setPlotId("");
-      setNewOwnerNationalId("");
-      setNewOwnerName("");
-      setFile(null);
-      const fileInput = document.getElementById("file-input");
-      if (fileInput) fileInput.value = "";
-
+        // Reset form
+        setPlotId("");
+        setNewOwnerNationalId("");
+        setNewOwnerName("");
+        setFile(null);
+        const fileInput = document.getElementById("file-input");
+        if (fileInput) fileInput.value = "";
+      } else {
+        throw new Error(result.message || "Failed to transfer ownership");
+      }
     } catch (err) {
       console.error("Transfer error:", err);
-      setError(err.message || "Transfer failed. Please try again.");
+      
+      // Extract error message from different error formats
+      let errorMessage = "Transfer failed. Please try again.";
+      
+      if (err.response?.data?.message) {
+        // API error response
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        // Direct error message
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setUploading(false);
       setTransferring(false);
@@ -177,31 +186,6 @@ export default function TransferOwnershipPage() {
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Wallet Connection */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-900">Wallet Connection</p>
-              <p className="text-xs text-gray-500">
-                {isConnected ? formatAddress(account) : "Not connected"}
-              </p>
-            </div>
-            {!isConnected ? (
-              <button
-                onClick={connectWallet}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Connect Wallet
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-green-600">Connected to {networkConfig.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Transfer Form */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Transfer Land Ownership</h2>
@@ -287,16 +271,16 @@ export default function TransferOwnershipPage() {
             {success && (
               <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-lg space-y-2">
                 <p className="font-semibold">{success}</p>
-                {txHash && (
+                {txHash && explorerUrl && (
                   <div className="space-y-1">
                     <p className="text-sm">Transaction Hash:</p>
                     <a
-                      href={`${networkConfig.blockExplorer}/tx/${txHash}`}
+                      href={explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-mono text-blue-600 hover:text-blue-700 underline break-all"
                     >
-                      {formatTxHash(txHash)}
+                      {txHash.slice(0, 10)}...{txHash.slice(-8)}
                     </a>
                   </div>
                 )}
@@ -306,13 +290,13 @@ export default function TransferOwnershipPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={!isConnected || uploading || transferring}
+              disabled={uploading || transferring}
               className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
             >
               {uploading
                 ? "Uploading to IPFS..."
                 : transferring
-                ? "Transferring Ownership..."
+                ? "Transferring on Blockchain..."
                 : "Transfer Ownership"}
             </button>
           </form>
@@ -320,15 +304,15 @@ export default function TransferOwnershipPage() {
 
         {/* Info Section */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">How It Works</h3>
+          <h3 className="text-sm font-semibold text-blue-900 mb-3">Transfer Process</h3>
           <ol className="space-y-2 text-sm text-blue-800">
             <li className="flex gap-2">
               <span className="font-bold">1.</span>
-              <span>Connect your MetaMask wallet to the Sepolia network</span>
+              <span>Enter the plot ID of the land to transfer</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold">2.</span>
-              <span>Enter the plot ID and new owner details</span>
+              <span>Enter new owner&apos;s national ID and name</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold">3.</span>
@@ -336,7 +320,11 @@ export default function TransferOwnershipPage() {
             </li>
             <li className="flex gap-2">
               <span className="font-bold">4.</span>
-              <span>Transaction is recorded immutably on the blockchain</span>
+              <span>System automatically records transfer on blockchain</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-bold">5.</span>
+              <span>Receive confirmation with blockchain transaction link</span>
             </li>
           </ol>
         </div>

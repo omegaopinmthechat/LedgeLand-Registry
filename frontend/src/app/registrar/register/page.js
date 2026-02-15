@@ -1,16 +1,13 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useWeb3 } from "@/context/Web3Context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { uploadFileToIPFS } from "@/api/api";
-import { registerLand, formatAddress, formatTxHash } from "@/services/blockchain";
+import { uploadFileToIPFS, registerLandOnBlockchain } from "@/api/api";
 
 // Register new land page (Registrar only)
 export default function RegisterLandPage() {
   const { user, isAuthenticated, isRegistrar, logout } = useAuth();
-  const { account, contract, isConnected, connectWallet, networkConfig } = useWeb3();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -27,6 +24,7 @@ export default function RegisterLandPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [txHash, setTxHash] = useState(null);
+  const [explorerUrl, setExplorerUrl] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -81,16 +79,12 @@ export default function RegisterLandPage() {
     setError(null);
     setSuccess(null);
     setTxHash(null);
+    setExplorerUrl(null);
 
     try {
       // Validation
       if (!plotId || !location || !ownerName || !ownerNationalId || !file) {
         setError("All fields are required");
-        return;
-      }
-
-      if (!isConnected) {
-        setError("Please connect your wallet first");
         return;
       }
 
@@ -105,32 +99,47 @@ export default function RegisterLandPage() {
       const deedCID = uploadResponse.data.cid;
       setUploading(false);
 
-      // Step 2: Register land on blockchain
+      // Step 2: Register land on blockchain via backend
       setRegistering(true);
-      const result = await registerLand(
-        contract,
-        parseInt(plotId),
+      const result = await registerLandOnBlockchain({
+        plotId: parseInt(plotId),
         location,
         ownerName,
-        ownerNationalId,
-        deedCID
-      );
+        nationalId: ownerNationalId,
+        deedCID,
+      });
 
-      setTxHash(result.transactionHash);
-      setSuccess("Land registered successfully!");
+      if (result.success && result.data) {
+        setTxHash(result.data.transactionHash);
+        setExplorerUrl(result.data.explorerUrl);
+        setSuccess(result.message || "Land registered successfully!");
 
-      // Reset form
-      setPlotId("");
-      setLocation("");
-      setOwnerName("");
-      setOwnerNationalId("");
-      setFile(null);
-      const fileInput = document.getElementById("file-input");
-      if (fileInput) fileInput.value = "";
-
+        // Reset form
+        setPlotId("");
+        setLocation("");
+        setOwnerName("");
+        setOwnerNationalId("");
+        setFile(null);
+        const fileInput = document.getElementById("file-input");
+        if (fileInput) fileInput.value = "";
+      } else {
+        throw new Error(result.message || "Failed to register land");
+      }
     } catch (err) {
       console.error("Registration error:", err);
-      setError(err.message || "Registration failed. Please try again.");
+      
+      // Extract error message from different error formats
+      let errorMessage = "Registration failed. Please try again.";
+      
+      if (err.response?.data?.message) {
+        // API error response
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        // Direct error message
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setUploading(false);
       setRegistering(false);
@@ -180,31 +189,6 @@ export default function RegisterLandPage() {
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Wallet Connection */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-900">Wallet Connection</p>
-              <p className="text-xs text-gray-500">
-                {isConnected ? formatAddress(account) : "Not connected"}
-              </p>
-            </div>
-            {!isConnected ? (
-              <button
-                onClick={connectWallet}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Connect Wallet
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-green-600">Connected to {networkConfig.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Registration Form */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Register New Land Parcel</h2>
@@ -307,16 +291,16 @@ export default function RegisterLandPage() {
             {success && (
               <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-lg space-y-2">
                 <p className="font-semibold">{success}</p>
-                {txHash && (
+                {txHash && explorerUrl && (
                   <div className="space-y-1">
                     <p className="text-sm">Transaction Hash:</p>
                     <a
-                      href={`${networkConfig.blockExplorer}/tx/${txHash}`}
+                      href={explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-mono text-blue-600 hover:text-blue-700 underline break-all"
                     >
-                      {formatTxHash(txHash)}
+                      {txHash.slice(0, 10)}...{txHash.slice(-8)}
                     </a>
                   </div>
                 )}
@@ -326,13 +310,13 @@ export default function RegisterLandPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={!isConnected || uploading || registering}
+              disabled={uploading || registering}
               className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
             >
               {uploading
                 ? "Uploading to IPFS..."
                 : registering
-                ? "Registering Land..."
+                ? "Registering on Blockchain..."
                 : "Register Land"}
             </button>
           </form>
@@ -344,23 +328,23 @@ export default function RegisterLandPage() {
           <ol className="space-y-2 text-sm text-green-800">
             <li className="flex gap-2">
               <span className="font-bold">1.</span>
-              <span>Connect your MetaMask wallet (must be registrar account)</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="font-bold">2.</span>
               <span>Enter unique plot ID and location details</span>
             </li>
             <li className="flex gap-2">
-              <span className="font-bold">3.</span>
+              <span className="font-bold">2.</span>
               <span>Enter initial owner name and national ID</span>
             </li>
             <li className="flex gap-2">
-              <span className="font-bold">4.</span>
+              <span className="font-bold">3.</span>
               <span>Upload deed document (automatically stored on IPFS)</span>
             </li>
             <li className="flex gap-2">
+              <span className="font-bold">4.</span>
+              <span>System automatically records ownership on blockchain</span>
+            </li>
+            <li className="flex gap-2">
               <span className="font-bold">5.</span>
-              <span>Confirm transaction in MetaMask to record on blockchain</span>
+              <span>Receive transaction confirmation with blockchain link</span>
             </li>
           </ol>
         </div>

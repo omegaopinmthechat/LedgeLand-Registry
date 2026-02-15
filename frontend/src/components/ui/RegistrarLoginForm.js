@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useRegistrarLogin } from "@/hooks/useRegistrarAuth";
 
 // Registrar login form component with username and password inputs
 const RegistrarLoginForm = () => {
+  const { isAuthenticated, isRegistrar } = useAuth();
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { handleRegistrarLogin, loading, error, setError } = useRegistrarLogin();
+
+  // Redirect if already logged in as registrar
+  useEffect(() => {
+    if (isAuthenticated && isRegistrar) {
+      router.push("/registrar/dashboard");
+    }
+  }, [isAuthenticated, isRegistrar, router]);
 
   // Toggles password visibility
   const togglePasswordVisibility = () => {
