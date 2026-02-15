@@ -3,6 +3,7 @@ import './config/env.js';
 import cors from "cors";
 import authRoutes from './routes/client/auth.routes.js';
 import registrarAuthRoutes from './routes/registrar/registrar.auth.routes.js';
+import registrarPinataRoutes from './routes/registrar/registrar.pinata.routes.js';
 
 const app = express()
 const baseUrl = "/api/v1";
@@ -17,6 +18,7 @@ app.use(
 
 app.use(`${baseUrl}/auth`, authRoutes);
 app.use(`${baseUrl}/registrar`, registrarAuthRoutes);
+app.use(`${baseUrl}/registrar/pinata`, registrarPinataRoutes);
 
 app.get('/', (req,res)=>{
     return res.send("PROJECT_9")

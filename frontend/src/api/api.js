@@ -28,3 +28,22 @@ export const loginRegistrar = async (username, password) => {
   const response = await api.post("/api/v1/registrar/login", { username, password });
   return response.data;
 };
+
+// Uploads a file to IPFS via Pinata (Registrar only)
+export const uploadFileToIPFS = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  
+  const response = await api.post("/api/v1/registrar/pinata/file", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// Uploads JSON metadata to IPFS via Pinata (Registrar only)
+export const uploadJSONToIPFS = async (metadata) => {
+  const response = await api.post("/api/v1/registrar/pinata/json", metadata);
+  return response.data;
+};
