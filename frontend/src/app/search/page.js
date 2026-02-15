@@ -9,7 +9,7 @@ import { getOwnershipHistory, getLandDetails, formatNationalId } from "@/service
 
 // Authenticated search page for viewing land ownership history
 export default function SearchPage() {
-  const { isAuthenticated, isRegistrar } = useAuth();
+  const { isAuthenticated, isRegistrar, logout } = useAuth();
   const { getReadOnlyContract, networkConfig } = useWeb3();
   const router = useRouter();
 
@@ -96,21 +96,49 @@ export default function SearchPage() {
     );
   }
 
+  const handleLogout = () => {
+    logout();
+    router.push(isRegistrar ? "/registrar/login" : "/login");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Land Registry Search</h1>
-              <p className="text-xs text-gray-500">Blockchain Verified Records</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push(isRegistrar ? "/registrar/dashboard" : "/dashboard")}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                  />
+                </svg>
+                Back
+              </button>
+              <div className="border-l border-gray-300 h-8"></div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Land Registry Search</h1>
+                <p className="text-xs text-gray-500">Blockchain Verified Records</p>
+              </div>
             </div>
-            <Link
-              href={isRegistrar ? "/registrar/dashboard" : "/dashboard"}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
             >
-              {isRegistrar ? "Dashboard" : "Dashboard"}
-            </Link>
+              Logout
+            </button>
           </div>
         </div>
       </nav>
