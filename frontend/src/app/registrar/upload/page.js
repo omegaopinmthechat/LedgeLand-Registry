@@ -2,27 +2,55 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import FileUploadForm from "@/components/ui/FileUploadForm";
 
 // Registrar upload page accessible only to authenticated registrars
 export default function RegistrarUploadPage() {
   const { user, isAuthenticated, isRegistrar, logout } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state to avoid hydration mismatch
+  useEffect(() => {
+    const setMounted1 = () => {
+      setMounted(true);
+    };
+    setMounted1();
+  }, []);
 
   // Redirects non-registrars and unauthenticated users
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (mounted && !isAuthenticated) {
       router.push("/registrar/login");
-    } else if (!isRegistrar) {
+    } else if (mounted && !isRegistrar) {
       // Redirect clients trying to access registrar upload page
       router.push("/dashboard");
     }
-  }, [isAuthenticated, isRegistrar, router]);
+  }, [mounted, isAuthenticated, isRegistrar, router]);
+
+  // Shows loading state during mount to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Shows upload page only if user is authenticated registrar
   if (!isAuthenticated || !isRegistrar) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   // Handles registrar logout and redirects to registrar login page

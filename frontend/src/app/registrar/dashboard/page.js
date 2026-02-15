@@ -2,26 +2,54 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Registrar dashboard page accessible only to authenticated registrars
 export default function RegistrarDashboardPage() {
   const { user, isAuthenticated, isRegistrar, logout } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state to avoid hydration mismatch
+  useEffect(() => {
+    const setMounted1 = () => {
+      setMounted(true);
+    }
+    setMounted1()
+  }, []);
 
   // Redirects non-registrars and unauthenticated users
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (mounted && !isAuthenticated) {
       router.push("/registrar/login");
-    } else if (!isRegistrar) {
+    } else if (mounted && !isRegistrar) {
       // Redirect clients trying to access registrar dashboard
       router.push("/dashboard");
     }
-  }, [isAuthenticated, isRegistrar, router]);
+  }, [mounted, isAuthenticated, isRegistrar, router]);
+
+  // Shows loading state during mount to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Shows dashboard content only if user is authenticated registrar
   if (!isAuthenticated || !isRegistrar) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   // Handles registrar logout and redirects to registrar login page
@@ -95,7 +123,97 @@ export default function RegistrarDashboardPage() {
             </div>
           </button>
 
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+          <button
+            onClick={() => router.push("/registrar/register")}
+            className="bg-white rounded-lg shadow p-6 border-l-4 border-green-600 hover:shadow-lg transition text-left"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Register New Land
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Register new land parcel on blockchain
+                </p>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8 text-green-600"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push("/registrar/transfer")}
+            className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600 hover:shadow-lg transition text-left"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Transfer Ownership
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Transfer land ownership on blockchain
+                </p>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8 text-blue-600"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                />
+              </svg>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push("/search")}
+            className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-600 hover:shadow-lg transition text-left"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Search Records
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  View land ownership history
+                </p>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8 text-purple-600"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </div>
+          </button>
+
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-gray-300">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Manage Users
             </h3>
@@ -104,16 +222,7 @@ export default function RegistrarDashboardPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              System Settings
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Configure system parameters
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-600">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-gray-300">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Reports
             </h3>

@@ -2,25 +2,50 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Dashboard page accessible only to authenticated client users
 export default function DashboardPage() {
   const { user, isAuthenticated, isRegistrar, logout } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Redirects to login page if user is not authenticated or is a registrar
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (mounted && !isAuthenticated) {
       router.push("/login");
-    } else if (isRegistrar) {
+    } else if (mounted && isRegistrar) {
       router.push("/registrar/dashboard");
     }
-  }, [isAuthenticated, isRegistrar, router]);
+  }, [mounted, isAuthenticated, isRegistrar, router]);
+
+  // Shows loading state during mount to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Shows dashboard content only if user is authenticated and not a registrar
   if (!isAuthenticated || isRegistrar) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   // Handles user logout and redirects to login page
