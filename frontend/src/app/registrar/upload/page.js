@@ -11,6 +11,14 @@ export default function RegistrarUploadPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
+  const getDisplayUsername = (user) => {
+    if (!user) return "";
+    if (user?.email && user.email.endsWith("@registrar.com")) {
+      return user.email.split("@")[0];
+    }
+    return user?.user_metadata?.full_name || user?.email || "";
+  };
+
   // Set mounted state to avoid hydration mismatch
   useEffect(() => {
     const setMounted1 = () => {
@@ -128,7 +136,7 @@ export default function RegistrarUploadPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {user?.user_metadata?.full_name || user?.email}
+                {getDisplayUsername(user)}
               </p>
               <p className="text-xs text-gray-500">Registrar Account</p>
             </div>

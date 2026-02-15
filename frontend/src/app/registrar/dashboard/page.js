@@ -10,6 +10,15 @@ export default function RegistrarDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
+  const getDisplayUsername = (user) => {
+    if (!user) return "";
+    // Prefer explicit full name only if email is not registrar type
+    if (user?.email && user.email.endsWith("@registrar.com")) {
+      return user.email.split("@")[0];
+    }
+    return user?.user_metadata?.full_name || user?.email || "";
+  };
+
   // Set mounted state to avoid hydration mismatch
   useEffect(() => {
     const setMounted1 = () => {
@@ -80,14 +89,14 @@ export default function RegistrarDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            Welcome, {user?.user_metadata?.full_name || user?.email}
+            Welcome, {getDisplayUsername(user)}
           </h2>
           <div className="space-y-2">
             <p className="text-gray-600">
               <span className="font-medium">Role:</span> Registrar
             </p>
             <p className="text-gray-600">
-              <span className="font-medium">Email:</span> {user?.email}
+              <span className="font-medium">Username:</span> {getDisplayUsername(user)}
             </p>
           </div>
         </div>
