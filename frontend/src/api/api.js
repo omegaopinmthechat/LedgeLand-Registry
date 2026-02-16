@@ -62,18 +62,18 @@ export const transferLandOnBlockchain = async (transferData) => {
 
 // Get ownership history from blockchain
 export const getOwnershipHistory = async (plotId) => {
-  const response = await api.get(`/api/v1/registrar/blockchain/history/${plotId}`);
+  const response = await api.get(`/api/v1/blockchain/history/${plotId}`);
   return response.data;
 };
 
 // Get current owner from blockchain
 export const getCurrentOwner = async (plotId) => {
-  const response = await api.get(`/api/v1/registrar/blockchain/owner/${plotId}`);
+  const response = await api.get(`/api/v1/blockchain/owner/${plotId}`);
   return response.data;
 };
 
 // Get land details from blockchain
 export const getLandDetails = async (plotId) => {
-  const response = await api.get(`/api/v1/registrar/blockchain/land/${plotId}`);
+  const response = await api.get(`/api/v1/blockchain/land/${plotId}`);
   return response.data;
 };

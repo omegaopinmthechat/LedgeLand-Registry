@@ -1,16 +1,13 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useWeb3 } from "@/context/Web3Context";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getOwnershipHistory, getLandDetails, formatNationalId } from "@/services/blockchain";
+import { getOwnershipHistory as getOwnershipHistoryAPI, getLandDetails as getLandDetailsAPI } from "@/api/api";
 
 // Authenticated search page for viewing land ownership history
 export default function SearchPage() {
   const { isAuthenticated, isRegistrar, logout } = useAuth();
-  const { getReadOnlyContract, networkConfig } = useWeb3();
   const router = useRouter();
 
   const [plotId, setPlotId] = useState("");
@@ -44,22 +41,18 @@ export default function SearchPage() {
         throw new Error("Please enter a valid plot ID");
       }
 
-      const contract = getReadOnlyContract();
-      if (!contract) {
-        throw new Error("Unable to connect to blockchain");
-      }
-
-      // Fetch land details and ownership history
-      const [details, history] = await Promise.all([
-        getLandDetails(contract, parseInt(plotId)),
-        getOwnershipHistory(contract, parseInt(plotId)),
+      // Fetch land details and ownership history from backend API
+      const [detailsResponse, historyResponse] = await Promise.all([
+        getLandDetailsAPI(parseInt(plotId)),
+        getOwnershipHistoryAPI(parseInt(plotId)),
       ]);
 
-      setLandDetails(details);
-      setOwnershipHistory(history);
+      // Extract data from API responses
+      setLandDetails(detailsResponse.data);
+      setOwnershipHistory(historyResponse.data);
     } catch (err) {
       console.error("Search error:", err);
-      setError(err.message || "Failed to fetch ownership history");
+      setError(err.response?.data?.message || err.message || "Failed to fetch ownership history");
     } finally {
       setSearching(false);
     }
