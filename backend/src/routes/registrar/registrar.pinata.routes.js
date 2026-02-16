@@ -7,9 +7,9 @@ import { ApiError } from "../../../utils/ApiError.js";
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Configure multer for file uploads (using memory storage for serverless compatibility)
 const upload = multer({
-  dest: "./tmp/uploads/",
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 100 * 1024 * 1024, // 100MB limit
   },

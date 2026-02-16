@@ -47,12 +47,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5500
-
-// uncomment for app.listen s
-// app.listen(PORT, ()=>{
-//     console.log("Server of PROJECT9 is running on: ", PORT)
-// });
+// Only start server in non-serverless environment (local development)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 5500;
+  app.listen(PORT, () => {
+    console.log("Server of PROJECT9 is running on: ", PORT);
+  });
+}
 
 // Export for Vercel serverless
 export default app;
