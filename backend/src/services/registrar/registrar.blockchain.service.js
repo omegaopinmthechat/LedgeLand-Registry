@@ -134,6 +134,8 @@ const getOwnershipHistory = async (plotId) => {
       deedCID: record.deedCID,
       timestamp: Number(record.timestamp),
       date: new Date(Number(record.timestamp) * 1000).toISOString(),
+      verified: true, // All records from blockchain are verified
+      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${record.deedCID}`,
     }));
 
     console.log(`✅ Found ${formattedHistory.length} ownership record(s)`);

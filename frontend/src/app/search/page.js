@@ -49,7 +49,7 @@ export default function SearchPage() {
 
       // Extract data from API responses
       setLandDetails(detailsResponse.data);
-      setOwnershipHistory(historyResponse.data);
+      setOwnershipHistory(historyResponse.data.history || []);
     } catch (err) {
       console.error("Search error:", err);
       setError(err.response?.data?.message || err.message || "Failed to fetch ownership history");
