@@ -49,6 +49,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5500
 
-app.listen(PORT, ()=>{
+app.listen(5500, ()=>{
     console.log("Server of PROJECT9 is running on: ", PORT)
 });
