@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { uploadFileToIPFS, registerLandOnBlockchain } from "@/api/api";
+import Navbar from "@/components/ui/Navbar";
 
 // Register new land page (Registrar only)
 export default function RegisterLandPage() {
@@ -147,51 +148,32 @@ export default function RegisterLandPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push("/registrar/dashboard")}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                  />
-                </svg>
-                Back
-              </button>
-              <div className="border-l border-gray-300 h-8"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Register New Land</h1>
-                <p className="text-xs text-gray-500">Blockchain Land Registry</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-50">
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Register New Land</h1>
+            <p className="text-sm text-gray-600 mt-1">Blockchain Land Registry</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push("/registrar/dashboard")}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              Dashboard
+            </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
             >
               Logout
             </button>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Registration Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Register New Land Parcel</h2>
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Register New Land Parcel</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Plot ID */}
@@ -348,7 +330,7 @@ export default function RegisterLandPage() {
             </li>
           </ol>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

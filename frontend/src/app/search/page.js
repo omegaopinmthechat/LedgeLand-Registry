@@ -102,51 +102,32 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push(isRegistrar ? "/registrar/dashboard" : "/dashboard")}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                  />
-                </svg>
-                Back
-              </button>
-              <div className="border-l border-gray-300 h-8"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Land Registry Search</h1>
-                <p className="text-xs text-gray-500">Blockchain Verified Records</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-50">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Land Registry Search</h1>
+            <p className="text-sm text-gray-600 mt-1">Blockchain Verified Records</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push(isRegistrar ? "/registrar/dashboard" : "/dashboard")}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              Dashboard
+            </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
             >
               Logout
             </button>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Form */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Search by Plot ID</h2>
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Search by Plot ID</h2>
           <p className="text-sm text-gray-600 mb-6">
             Enter a plot ID to view its complete ownership history on the blockchain. This is a
             gas-free operation.
@@ -217,17 +198,17 @@ export default function SearchPage() {
 
         {/* Land Details */}
         {landDetails && (
-          <div className="bg-white rounded-lg shadow mb-6">
+          <div className="bg-white rounded-xl shadow-lg mb-8">
             {/* Verification Banner */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-t-lg flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="bg-linear-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-t-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}
                   stroke="currentColor"
-                  className="w-5 h-5"
+                  className="w-6 h-6"
                 >
                   <path
                     strokeLinecap="round"
@@ -235,31 +216,31 @@ export default function SearchPage() {
                     d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                   />
                 </svg>
-                <span className="font-semibold">Blockchain Verified Land Record</span>
+                <span className="font-bold text-lg">Blockchain Verified Land Record</span>
               </div>
-              <span className="text-xs bg-white bg-opacity-25 px-3 py-1 rounded-full">
+              <span className="text-xs bg-white bg-opacity-30 px-4 py-1.5 rounded-full font-medium">
                 Sepolia Network
               </span>
             </div>
             
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Land Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Land Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-500">Plot ID</p>
-                  <p className="text-base font-medium text-gray-900">{landDetails.plotId}</p>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Plot ID</p>
+                  <p className="text-lg font-semibold text-gray-900">{landDetails.plotId}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="text-base font-medium text-gray-900">{landDetails.location}</p>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Location</p>
+                  <p className="text-lg font-semibold text-gray-900">{landDetails.location}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Current Owner Name</p>
-                  <p className="text-base font-medium text-gray-900">{landDetails.currentOwnerName}</p>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Current Owner Name</p>
+                  <p className="text-lg font-semibold text-gray-900">{landDetails.currentOwnerName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Current Owner National ID</p>
-                  <p className="text-base font-medium text-gray-900 font-mono">{landDetails.currentOwnerNationalId}</p>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Current Owner National ID</p>
+                  <p className="text-lg font-semibold text-gray-900 font-mono">{landDetails.currentOwnerNationalId}</p>
                 </div>
               </div>
             </div>
@@ -268,12 +249,12 @@ export default function SearchPage() {
 
         {/* Ownership History */}
         {ownershipHistory.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-2xl font-bold text-gray-900">
                 Ownership History ({ownershipHistory.length} records)
               </h3>
-              <span className="text-sm text-gray-500">Complete Chain of Custody</span>
+              <span className="text-sm text-gray-600 font-medium">Complete Chain of Custody</span>
             </div>
 
             <div className="space-y-4">
@@ -528,7 +509,7 @@ export default function SearchPage() {
             </li>
           </ul>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

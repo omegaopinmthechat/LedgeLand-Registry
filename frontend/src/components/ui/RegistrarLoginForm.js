@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useRegistrarLogin } from "@/hooks/useRegistrarAuth";
@@ -33,14 +34,19 @@ const RegistrarLoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Registrar Login</h1>
-          <p className="text-gray-600">Access registrar dashboard</p>
-        </div>
+    <div className="w-full max-w-md p-8">
+      <div className="mb-8">
+        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 mr-1">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to Home
+        </Link>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Registrar Login</h1>
+        <p className="text-gray-600">Access registrar dashboard</p>
+      </div>
 
-        <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
@@ -143,7 +149,6 @@ const RegistrarLoginForm = () => {
           </button>
         </form>
       </div>
-    </div>
   );
 };
 
